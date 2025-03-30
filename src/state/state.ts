@@ -1,5 +1,5 @@
 import { StateManager, Command } from "rko";
-import { initialCamera, initialContent, initialMeta, initialTheme } from "C:/Users/Waqas Ul Hasan/notion-draw/src/constants/state";
+import { initialCamera, initialContent, initialMeta, initialTheme } from "../constants/state";
 import { Action, App, Meta, StateSelector, Status, Theme } from "../types/app";
 import { Point, PressuredPoint, Zoom } from "../types/canvas";
 import { Freeform, ShapeType } from "../types/shape";
