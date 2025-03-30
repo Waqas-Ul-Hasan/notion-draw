@@ -1,5 +1,5 @@
-import { StateManager } from "rko";
-import { initialCamera, initialContent, initialMeta, initialTheme } from "../constants/state";
+import { StateManager, Command } from "rko";
+import { initialCamera, initialContent, initialMeta, initialTheme } from "C:/Users/Waqas Ul Hasan/notion-draw/src/constants/state";
 import { Action, App, Meta, StateSelector, Status, Theme } from "../types/app";
 import { Point, PressuredPoint, Zoom } from "../types/canvas";
 import { Freeform, ShapeType } from "../types/shape";
@@ -33,78 +33,74 @@ export type EraseMove = (point: PressuredPoint) => void;
 export type EraseEnd = () => void;
 
 export class AppState extends StateManager<App> {
+  private listeners: ((state: App) => void)[] = [];
+
+  subscribe(listener: (state: App) => void) {
+    this.listeners.push(listener);
+    return () => {
+      this.listeners = this.listeners.filter((l) => l !== listener);
+    };
+  }
+
+  // Public method for full state updates (e.g., from Firebase)
+  setFullState(newState: App, id?: string) {
+    this.setState({ before: this.state, after: newState }, id); // Protected, callable here
+    this.listeners.forEach((listener) => listener(this.state));
+  }
+
   setStatus: SetStatus = (status) => {
     const validShapes = this.state.content.shapes.filter(isValidShape);
     const killedEditedShapes = validShapes.filter((shape) => !shape.editing);
-    this.setState({
-      before: {
-        status: this.state.status,
-        content: this.state.content,
-      },
-      after: {
-        status,
-        content: {
-          ...this.state.content,
-          shapes: killedEditedShapes,
-        },
+    this.patchState({
+      status,
+      content: {
+        ...this.state.content,
+        shapes: killedEditedShapes,
       },
     });
+    this.listeners.forEach((listener) => listener(this.state));
   };
 
   setTheme: SetTheme = (theme) => {
-    this.setState({
-      before: {
-        theme: this.state.theme,
-      },
-      after: {
-        theme,
-      },
+    this.patchState({
+      theme: { ...this.state.theme, ...theme },
     });
+    this.listeners.forEach((listener) => listener(this.state));
   };
 
   setMeta: SetMeta = (meta) => {
-    this.setState({
-      before: {
-        meta: this.state.meta,
-      },
-      after: {
-        meta,
-      },
+    this.patchState({
+      meta: { ...this.state.meta, ...meta },
     });
+    this.listeners.forEach((listener) => listener(this.state));
   };
 
   onPan: Pan = (dx, dy) => {
     this.patchState({
       camera: updateCamera(this.state.camera, (camera) => panCamera(camera, dx, dy)),
     });
+    this.listeners.forEach((listener) => listener(this.state));
   };
 
   onPinch: Pinch = (center, dz) => {
     this.patchState({
       camera: updateCamera(this.state.camera, (camera) => zoomCameraTo(camera, center, dz)),
     });
+    this.listeners.forEach((listener) => listener(this.state));
   };
 
   onResetZoom: ResetZoom = () => {
-    this.setState({
-      before: {
-        camera: this.state.camera,
-      },
-      after: {
-        camera: updateCamera(this.state.camera, (camera) => resetZoom(camera)),
-      },
+    this.patchState({
+      camera: updateCamera(this.state.camera, (camera) => resetZoom(camera)),
     });
+    this.listeners.forEach((listener) => listener(this.state));
   };
 
   onResetCamera: ResetCamera = () => {
-    this.setState({
-      before: {
-        camera: this.state.camera,
-      },
-      after: {
-        camera: updateCamera(this.state.camera, () => initialCamera),
-      },
+    this.patchState({
+      camera: updateCamera(this.state.camera, () => initialCamera),
     });
+    this.listeners.forEach((listener) => listener(this.state));
   };
 
   onEraseStart: EraseStart = (point) => {
@@ -114,11 +110,6 @@ export class AppState extends StateManager<App> {
 
   onEraseMove: EraseMove = (point) => {
     const pointOnCanvas = screenToCanvasPressured(point, this.state.camera);
-
-    // @HACK
-    // The web standards for this are wonky ATM - Chrome and FF seem to differ on the
-    // type of point which `isPointInStroke` should accept. Chrome forces `SVGPoint` which
-    // is already deprecated.
     const pointOnSvg = (document.getElementById("render-scene-svg") as any)?.createSVGPoint();
     pointOnSvg.x = pointOnCanvas.x;
     pointOnSvg.y = pointOnCanvas.y;
@@ -143,28 +134,23 @@ export class AppState extends StateManager<App> {
         shapes: updatedShapes,
       },
     });
+    this.listeners.forEach((listener) => listener(this.state));
   };
 
   onEraseEnd: EraseEnd = () => {
     const validShapes = this.state.content.shapes.filter(isValidShape);
     const updatedShapes = validShapes.map(endEditing);
 
-    this.setState({
-      before: {
-        action: this.snapshot.action,
-        status: this.snapshot.status,
-        content: this.snapshot.content,
-      },
-      after: {
-        action: Action.IDLE,
-        status: Status.ERASE,
-        content: {
-          ...this.state.content,
-          selectedIds: [],
-          shapes: updatedShapes,
-        },
+    this.patchState({
+      action: Action.IDLE,
+      status: Status.ERASE,
+      content: {
+        ...this.state.content,
+        selectedIds: [],
+        shapes: updatedShapes,
       },
     });
+    this.listeners.forEach((listener) => listener(this.state));
   };
 
   onFreehandStart: FreehandStart = (point) => {
@@ -188,6 +174,7 @@ export class AppState extends StateManager<App> {
         shapes: [...this.state.content.shapes, shape],
       },
     });
+    this.listeners.forEach((listener) => listener(this.state));
   };
 
   onFreehandMove: FreehandMove = (point) => {
@@ -209,51 +196,39 @@ export class AppState extends StateManager<App> {
         shapes: updatedShapes,
       },
     });
+    this.listeners.forEach((listener) => listener(this.state));
   };
 
   onFreehandEnd: FreehandEnd = () => {
     const validShapes = this.state.content.shapes.filter(isValidShape);
     const updatedShapes = validShapes.map(endEditing);
 
-    this.setState({
-      before: {
-        action: this.snapshot.action,
-        status: this.snapshot.status,
-        content: this.snapshot.content,
-      },
-      after: {
-        action: Action.IDLE,
-        status: Status.FREEHAND,
-        content: {
-          ...this.state.content,
-          selectedIds: [],
-          shapes: updatedShapes,
-        },
+    this.patchState({
+      action: Action.IDLE,
+      status: Status.FREEHAND,
+      content: {
+        ...this.state.content,
+        selectedIds: [],
+        shapes: updatedShapes,
       },
     });
+    this.listeners.forEach((listener) => listener(this.state));
   };
 
   onDeleteAllShapes: DeleteAllShapes = () => {
-    this.setState({
-      before: {
-        ...this.state,
-      },
-      after: {
-        ...this.state,
-        content: {
-          ...this.state.content,
-          selectedIds: [],
-          shapes: [],
-        },
+    this.patchState({
+      content: {
+        ...this.state.content,
+        selectedIds: [],
+        shapes: [],
       },
     });
+    this.listeners.forEach((listener) => listener(this.state));
   };
 }
 
 const url = window.location.href;
 const isNewURL = url.includes("notion-draw.art");
-
-// Avoid upgrades on older drawings.
 const version = isNewURL ? 2 : 1;
 
 export const app = new AppState(initialAppState, url, version);
