@@ -8,6 +8,8 @@ import { screenToCanvasPressured } from "../utils/canvas";
 import { isValidShape, makeShapeId } from "../utils/shape";
 import { endEditing } from "../utils/state";
 
+import { INITIAL_STATE } from '../constants/state';
+
 export const initialAppState: App = {
   status: Status.FREEHAND,
   action: Action.IDLE,

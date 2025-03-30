@@ -23,3 +23,5 @@ export const initialTheme: Theme = {
 export const initialMeta: Meta = {
   locked: false,
 };
+
+export const INITIAL_STATE = [];
