@@ -1,8 +1,8 @@
 import { useEffect } from "react";
-import { Disabled } from "./components/Disabled";
+// import { Disabled } from "./components/Disabled"; // No longer needed
 import { Editor } from "./components/Editor";
 import { ErrorBoundary } from "./components/ErrorBoundary";
-import { isMobile } from "./constants/app";
+// import { isMobile } from "./constants/app"; // Remove if unused elsewhere
 import "./css/styles.css";
 import { db } from "./firebase";
 import { ref, get, set } from "firebase/database";
@@ -22,7 +22,7 @@ export default function Notion() {
         const snapshot = await get(stateRef);
         if (snapshot.exists()) {
           const stateFromFirebase = snapshot.val();
-          app.setFullState(stateFromFirebase); // Use setFullState instead of setState
+          app.setFullState(stateFromFirebase);
         }
       } catch (error) {
         console.error("Error loading state from Firebase:", error);
@@ -44,28 +44,25 @@ export default function Notion() {
 
   return (
     <ErrorBoundary>
-      {isMobile ? (
-        <Disabled />
-      ) : (
-        <Editor
-          svgStyle={{
-            background: "#fff",
-          }}
-          containerStyle={{
-            height: "100vh",
-            minHeight: "100vh",
-            width: "100%",
-            borderRadius: 0,
-            margin: 0,
-          }}
-          options={{
-            hideBackgroundPattern: true,
-            disablePanning: false,
-          }}
-          debug={false}
-          showFPS={false}
-        />
-      )}
+      {/* Removed mobile restriction - Firebase handles persistence */}
+      <Editor
+        svgStyle={{
+          background: "#fff",
+        }}
+        containerStyle={{
+          height: "100vh",
+          minHeight: "100vh",
+          width: "100%",
+          borderRadius: 0,
+          margin: 0,
+        }}
+        options={{
+          hideBackgroundPattern: true,
+          disablePanning: false,
+        }}
+        debug={false}
+        showFPS={false}
+      />
     </ErrorBoundary>
   );
 }
