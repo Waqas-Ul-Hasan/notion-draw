@@ -41,6 +41,12 @@ export const Controls: FC<ControlsProps> = ({
     setShowStyles(false);
   }, [hidden]);
 
+  const toggleDarkMode = () => setTheme({ isDarkMode: !theme.isDarkMode });
+  const setSystemTheme = () => {
+    const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    setTheme({ isDarkMode: systemDark });
+  };
+
   return (
     <Container>
       <RightContainer hide={hidden}>
@@ -76,7 +82,6 @@ export const Controls: FC<ControlsProps> = ({
                 ))}
               </Options>
             </Section>
-
             <Section>
               <Label>
                 <Text>Sizes</Text>
@@ -111,20 +116,15 @@ export const Controls: FC<ControlsProps> = ({
                 />
               </Options>
             </Section>
-
             <Section>
               <Button onClick={() => onResetCamera()}>Reset zoom & center</Button>
+              <Button onClick={setSystemTheme}>Use system theme</Button>
             </Section>
           </TogglablePanel>
         )}
       </RightContainer>
 
-      <LeftContainer
-        hide={hidden}
-        style={{
-          width: meta.locked ? 46 : 80,
-        }}
-      >
+      <LeftContainer hide={hidden} style={{ width: meta.locked ? 46 : 114 }}>
         <SidePanel hide={isLocked}>
           <DrawingOption
             selected={status === Status.FREEHAND}
@@ -138,7 +138,6 @@ export const Controls: FC<ControlsProps> = ({
             }}
           />
         </SidePanel>
-
         <SidePanel>
           {meta.locked ? (
             <LockOption
@@ -164,6 +163,45 @@ export const Controls: FC<ControlsProps> = ({
                 tooltipSpeed={200}
                 onClick={() => onDeleteAllShapes()}
               />
+              <DarkModeOption
+                tooltip={theme.isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+                tooltipOffsetX={40}
+                tooltipOffsetY={-65}
+                tooltipSpeed={200}
+                onClick={toggleDarkMode}
+              >
+                {theme.isDarkMode ? (
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#37352F"
+                    strokeWidth="2"
+                  >
+                    <circle cx="12" cy="12" r="5" />
+                    <line x1="12" y1="1" x2="12" y2="3" />
+                    <line x1="12" y1="21" x2="12" y2="23" />
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                    <line x1="1" y1="12" x2="3" y2="12" />
+                    <line x1="21" y1="12" x2="23" y2="12" />
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                  </svg>
+                ) : (
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#FFFFFF"
+                    strokeWidth="2"
+                  >
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                  </svg>
+                )}
+              </DarkModeOption>
             </Fragment>
           )}
         </SidePanel>
@@ -190,9 +228,7 @@ const HidableContainer = styled.div<{ hide?: boolean }>`
   pointer-events: ${(props) => (props.hide ? "none" : "all")};
   opacity: ${(props) => (props.hide ? 0 : 1)};
   transform: scale(${(props) => (props.hide ? 0.975 : 1)});
-
   cursor: ${(props) => (props.hide ? "default !important" : null)};
-
   * {
     cursor: ${(props) => (props.hide ? "default !important" : null)};
   }
@@ -206,7 +242,6 @@ const LeftContainer = styled(HidableContainer)`
   top: 12px;
   left: 12px;
   bottom: 12px;
-
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -223,7 +258,6 @@ const RightContainer = styled(HidableContainer)`
   top: 32px;
   right: 12px;
   bottom: 0;
-
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -241,7 +275,6 @@ const SidePanel = styled(HidableContainer)`
     rgba(0, 0, 0, 0.12) 0px 0px 16px -12px, rgba(0, 0, 0, 0.08) 0px 0px 2px 0px;
   box-sizing: border-box;
   border-radius: 6px;
-
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -254,7 +287,6 @@ const SidePanel = styled(HidableContainer)`
 const AdjustableSidePanel = styled(SidePanel)`
   padding: 8px 12px 0;
   justify-content: flex-start;
-
   @media (max-height: 240px) {
     width: 350px;
   }
@@ -271,11 +303,9 @@ const StyleSummary = styled.div`
   border-radius: 6px;
   cursor: pointer;
   transition: all 100ms ease;
-
   &:hover {
     background: #eee;
   }
-
   &:active {
     background: #ccc;
   }
@@ -292,11 +322,9 @@ const DrawingOption = styled(SquiggleSvg)<{ selected: boolean }>`
   background: ${(props) => (props.selected ? "#ddd" : "transparent")};
   cursor: pointer;
   transition: all 100ms ease;
-
   &:hover {
     background: ${(props) => (props.selected ? "#ddd" : "#eee")};
   }
-
   &:active {
     background: #ccc;
   }
@@ -313,11 +341,9 @@ const ErasingOption = styled(EraserSvg)<{ selected: boolean }>`
   background: ${(props) => (props.selected ? "#ddd" : "transparent")};
   cursor: pointer;
   transition: all 100ms ease;
-
   &:hover {
     background: ${(props) => (props.selected ? "#ddd" : "#eee")};
   }
-
   &:active {
     background: #ccc;
   }
@@ -334,11 +360,9 @@ const DeleteOption = withTooltip(styled(TrashSvg)`
   background: transparent;
   cursor: pointer;
   transition: all 100ms ease;
-
   &:hover {
     background: #eee;
   }
-
   &:active {
     background: #ccc;
   }
@@ -355,15 +379,12 @@ const LockOption = withTooltip(styled(LockSvg)`
   background: transparent;
   cursor: pointer;
   transition: all 100ms ease;
-
   &:hover {
     background: #eee;
   }
-
   &:active {
     background: #ccc;
   }
-
   path {
     stroke-width: 2px;
   }
@@ -380,17 +401,34 @@ const UnlockOption = withTooltip(styled(LockOpenedSvg)`
   background: transparent;
   cursor: pointer;
   transition: all 100ms ease;
-
   &:hover {
     background: #eee;
   }
-
   &:active {
     background: #ccc;
   }
-
   path {
     stroke-width: 2px;
+  }
+`);
+
+const DarkModeOption = withTooltip(styled.button`
+  position: relative;
+  display: inline-block;
+  margin: 2px;
+  padding: 6px;
+  height: 30px;
+  width: 30px;
+  border-radius: 100%;
+  background: transparent;
+  cursor: pointer;
+  transition: all 100ms ease;
+  border: none;
+  &:hover {
+    background: #eee;
+  }
+  &:active {
+    background: #ccc;
   }
 `);
 
@@ -404,10 +442,8 @@ const SummaryStroke = styled(SquiggleSvg)<{ color: string; size?: number }>`
   border-radius: 100%;
   color: ${(props) => props.color};
   background: transparent;
-  // transform: rotate(192deg);
   cursor: pointer;
   transition: all 100ms ease;
-
   path {
     fill: ${(props) => props.color}3b;
   }
@@ -423,18 +459,14 @@ const ColorOption = styled(SquiggleSvg)<{ color: string; selected: boolean }>`
   border-radius: 100%;
   color: ${(props) => props.color};
   background: ${(props) => (props.selected ? "#ddd" : "transparent")};
-  // transform: rotate(192deg);
   cursor: pointer;
   transition: all 100ms ease;
-
   &:hover {
     background: ${(props) => (props.selected ? "#ddd" : "#eee")};
   }
-
   &:active {
     background: #ccc;
   }
-
   path {
     fill: ${(props) => props.color}3b;
   }
@@ -457,11 +489,9 @@ const Button = styled(Text)`
   align-items: center;
   cursor: pointer;
   transition: all 100ms ease;
-
   &:hover {
     background: #eee;
   }
-
   &:active {
     background: #ccc;
   }
@@ -479,7 +509,6 @@ const Section = styled.div`
   flex-direction: row;
   align-items: flex-start;
   justify-content: center;
-
   margin-bottom: 8px;
 `;
 
@@ -508,21 +537,17 @@ const StrokeSize = styled.div<{ color: string; selected: boolean; size: number }
   width: 40px;
   border-radius: 6px;
   background: ${(props) => (props.selected ? "#ddd" : "transparent")};
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 100ms ease;
-
   &:hover {
     background: ${(props) => (props.selected ? "#ddd" : "#eee")};
   }
-
   &:active {
     background: #ccc;
   }
-
   &:after {
     content: "";
     width: 90%;

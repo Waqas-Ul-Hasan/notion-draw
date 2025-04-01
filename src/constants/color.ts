@@ -33,16 +33,17 @@ export const PenPreview = {
   Secondary: "#FFFFFF",
 };
 
-export const Palette = {
-  Black: "#10293c",
-  Blue: "#339af0",
-  Green: "#37b24d",
-  Red: "#f03e3e",
-  Cyan: "#3bc9db",
-  Yellow: "#fcc419",
-  Orange: "#fd7e14",
-  Purple: "#845ef7",
-};
+export enum Palette {
+  Black = "#000000",
+  White = "#FFFFFF", // Added white
+  Gray = "#808080",
+  Red = "#FF4040",
+  Orange = "#FF8000",
+  Yellow = "#FFFF00",
+  Green = "#00FF00",
+  Blue = "#4040FF",
+  Purple = "#C000C0",
+}
 
 export const Color = {
   Palette,
