@@ -1,8 +1,6 @@
-import { useEffect } from "react";
-// import { Disabled } from "./components/Disabled"; // No longer needed
+import { useEffect, useState } from "react";
 import { Editor } from "./components/Editor";
 import { ErrorBoundary } from "./components/ErrorBoundary";
-// import { isMobile } from "./constants/app"; // Remove if unused elsewhere
 import "./css/styles.css";
 import { db } from "./firebase";
 import { ref, get, set } from "firebase/database";
@@ -14,6 +12,10 @@ const getDrawingName = () => {
 };
 
 export default function Notion() {
+  const [isDarkMode, setIsDarkMode] = useState(
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
+
   useEffect(() => {
     const loadState = async () => {
       const drawingName = getDrawingName();
@@ -23,6 +25,7 @@ export default function Notion() {
         if (snapshot.exists()) {
           const stateFromFirebase = snapshot.val();
           app.setFullState(stateFromFirebase);
+          setIsDarkMode(stateFromFirebase.theme.isDarkMode); // Load saved theme
         }
       } catch (error) {
         console.error("Error loading state from Firebase:", error);
@@ -42,27 +45,51 @@ export default function Notion() {
     return () => unsubscribe();
   }, []);
 
+  const toggleDarkMode = () => {
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    app.setTheme({ isDarkMode: newDarkMode });
+  };
+
   return (
     <ErrorBoundary>
-      {/* Removed mobile restriction - Firebase handles persistence */}
-      <Editor
-        svgStyle={{
-          background: "#fff",
-        }}
-        containerStyle={{
-          height: "100vh",
-          minHeight: "100vh",
-          width: "100%",
-          borderRadius: 0,
-          margin: 0,
-        }}
-        options={{
-          hideBackgroundPattern: true,
-          disablePanning: false,
-        }}
-        debug={false}
-        showFPS={false}
-      />
+      <div style={{ position: "relative", height: "100vh" }}>
+        <Editor
+          svgStyle={{
+            background: isDarkMode ? "#333" : "#fff",
+          }}
+          containerStyle={{
+            height: "100vh",
+            minHeight: "100vh",
+            width: "100%",
+            borderRadius: 0,
+            margin: 0,
+            background: isDarkMode ? "#1a1a1a" : "#fff",
+          }}
+          options={{
+            hideBackgroundPattern: true,
+            disablePanning: false,
+          }}
+          debug={false}
+          showFPS={false}
+        />
+        <button
+          onClick={toggleDarkMode}
+          style={{
+            position: "absolute",
+            top: "10px",
+            right: "10px",
+            padding: "8px 16px",
+            background: isDarkMode ? "#555" : "#ddd",
+            color: isDarkMode ? "#fff" : "#000",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          {isDarkMode ? "Light Mode" : "Dark Mode"}
+        </button>
+      </div>
     </ErrorBoundary>
   );
 }

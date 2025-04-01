@@ -26,16 +26,17 @@ export enum Action {
   ERASING,
 }
 
+export interface Theme {
+  penColor: string;
+  penSize: number;
+  eraserSize: number;
+  isDarkMode: boolean;
+}
+
 export type Content = {
   shapes: Shape[];
   selectedIds: ShapeId[];
   hoveredIds: ShapeId[];
-};
-
-export type Theme = {
-  penColor: string;
-  penSize: number;
-  eraserSize: number;
 };
 
 export type Meta = {
