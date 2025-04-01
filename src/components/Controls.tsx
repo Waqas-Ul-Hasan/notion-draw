@@ -176,7 +176,7 @@ export const Controls: FC<ControlsProps> = ({
                     height="18"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#37352F"
+                    stroke="#FFFFFF" // White sun in dark mode
                     strokeWidth="2"
                   >
                     <circle cx="12" cy="12" r="5" />
@@ -195,7 +195,7 @@ export const Controls: FC<ControlsProps> = ({
                     height="18"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#FFFFFF"
+                    stroke="#37352F" // Dark moon in light mode
                     strokeWidth="2"
                   >
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
@@ -268,7 +268,7 @@ const RightContainer = styled(HidableContainer)`
 
 const SidePanel = styled(HidableContainer)`
   margin: 0 0 8px;
-  background: #fefefe;
+  background: ${props => props.theme?.isDarkMode ? "#333" : "#fefefe"};
   min-height: 30px;
   padding: 4px;
   box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 16px -1px, rgba(0, 0, 0, 0.05) 0px 0px 16px -8px,

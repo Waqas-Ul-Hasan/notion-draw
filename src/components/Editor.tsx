@@ -58,15 +58,14 @@ export const Editor: FC<EditorProps> = ({
 
   useKeyboardShortcuts();
 
-  console.log("Theme:", theme);
-return (
-  <Container
-    id="canvas"
-    style={{
-      ...containerStyle,
-      background: theme.isDarkMode ? "#191919" : "#FFFFFF",
-    }}
-  >
+  return (
+    <Container
+      id="canvas"
+      style={{
+        ...containerStyle,
+        background: theme.isDarkMode ? "#191919" : "#FFFFFF",
+      }}
+    >
       <ActivityProvider>
         <MouseProvider>
           <AnimationProvider>
@@ -90,7 +89,7 @@ return (
                 options={options}
                 svgStyle={{
                   ...svgStyle,
-                  background: theme.isDarkMode ? "#2F3437" : "#FFFFFF",
+                  background: theme.isDarkMode ? "#191919" : "#FFFFFF",
                 }}
               />
               <Controls
