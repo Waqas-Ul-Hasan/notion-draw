@@ -19,7 +19,6 @@ const Container = styled.div`
   min-height: 560px;
   width: 90%;
   margin: 24px auto 0;
-  background: #ffffff;
   box-sizing: border-box;
   box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
   border-radius: 4px;
@@ -59,8 +58,15 @@ export const Editor: FC<EditorProps> = ({
 
   useKeyboardShortcuts();
 
-  return (
-    <Container id="canvas" style={containerStyle}>
+  console.log("Theme:", theme);
+return (
+  <Container
+    id="canvas"
+    style={{
+      ...containerStyle,
+      background: theme.isDarkMode ? "#191919" : "#FFFFFF",
+    }}
+  >
       <ActivityProvider>
         <MouseProvider>
           <AnimationProvider>
@@ -82,7 +88,10 @@ export const Editor: FC<EditorProps> = ({
                 onEraseEnd={onEraseEnd}
                 debug={debug}
                 options={options}
-                svgStyle={svgStyle}
+                svgStyle={{
+                  ...svgStyle,
+                  background: theme.isDarkMode ? "#2F3437" : "#FFFFFF",
+                }}
               />
               <Controls
                 status={status}
